@@ -6,10 +6,12 @@ import com.example.noteappapi.mapper.toNoteDto
 import com.example.noteappapi.model.Note
 import com.example.noteappapi.repository.NoteRepository
 import jakarta.validation.Valid
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/notes")
+@Validated
 class NoteController(private val noteRepository: NoteRepository) {
 
     @PostMapping
@@ -28,7 +30,7 @@ class NoteController(private val noteRepository: NoteRepository) {
     }
 
     @GetMapping("/{ownerId}")
-    fun getNotesByOwnerId(@PathVariable ownerId: Long): List<NoteDto> {
+    fun getNotesByOwnerId(@Valid @PathVariable ownerId: Long): List<NoteDto> {
 
         return noteRepository.findByOwnerId(ownerId).map {
             it.toNoteDto()

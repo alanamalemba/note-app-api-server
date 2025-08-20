@@ -13,7 +13,7 @@ data class Note(
 
     val title: String,
     val content: String,
-    val color: Long,
+    val color: String,
 
     @Column(name = "owner_id")
     val ownerId: Long,

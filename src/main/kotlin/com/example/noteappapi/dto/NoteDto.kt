@@ -6,8 +6,6 @@ data class NoteDto(
     val id: Long,
     val title: String,
     val content: String,
-    val color: Long,
+    val color: String,
     val createdAt: Instant
-){
-
-}
+)
