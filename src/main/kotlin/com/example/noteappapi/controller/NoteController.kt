@@ -30,12 +30,19 @@ class NoteController(private val noteRepository: NoteRepository) {
     }
 
     @GetMapping("/{ownerId}")
-    fun getNotesByOwnerId(@Valid @PathVariable ownerId: Long): List<NoteDto> {
+    fun getNotesByOwnerId(@PathVariable ownerId: Long): List<NoteDto> {
 
         return noteRepository.findByOwnerId(ownerId).map {
             it.toNoteDto()
         }
 
+    }
+
+    @DeleteMapping("/{noteId}")
+    fun deleteNoteById(@PathVariable noteId: Long): String {
+        noteRepository.deleteById(noteId)
+
+        return "Note of id $noteId deleted successfully!"
     }
 
 }
