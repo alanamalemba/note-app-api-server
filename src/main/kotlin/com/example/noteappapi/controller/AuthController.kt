@@ -21,12 +21,16 @@ import kotlin.text.startsWith
 @RequestMapping("/auth")
 class AuthController(val authService: AuthService, val jwtService: JwtService) {
 
+    data class SingUpResponse(val accessToken: String)
+    data class SingInResponse(val accessToken: String)
+
     private fun setRefreshTokenCookie(
         tokenPair: AuthService.TokenPair,
         httpServletResponse: HttpServletResponse
     ) {
         val refreshTokenCookie: Cookie = Cookie(JwtService.JwtType.REFRESH.value, tokenPair.refreshToken).apply {
-            isHttpOnly
+            isHttpOnly = true
+            secure = false // set to true if using http or env is prod
             path = "/"
             maxAge = JwtService.REFRESH_TOKEN_VALIDITY_IN_MS.toInt()
         }
@@ -38,24 +42,22 @@ class AuthController(val authService: AuthService, val jwtService: JwtService) {
     fun signUp(
         @Valid @RequestBody singUpRequestBody: SingUpRequestBody,
         httpServletResponse: HttpServletResponse
-    ): UserDto {
-        val tokenPair = authService.singIn(singUpRequestBody.email, singUpRequestBody.password)
-
+    ): SingUpResponse {
+        val tokenPair = authService.signUp(singUpRequestBody.email, singUpRequestBody.password)
         setRefreshTokenCookie(tokenPair, httpServletResponse)
-        // todo: send accessToken
-        return authService.signUp(singUpRequestBody.email, singUpRequestBody.password)
+
+        return SingUpResponse(accessToken = tokenPair.accessToken)
     }
 
     @PostMapping("/sign-in")
     fun signIn(
         @Valid @RequestBody singUpRequestBody: SingUpRequestBody,
         httpServletResponse: HttpServletResponse
-    ): String {
+    ): SingUpResponse {
         val tokenPair = authService.singIn(singUpRequestBody.email, singUpRequestBody.password)
         setRefreshTokenCookie(tokenPair, httpServletResponse)
 
-        // todo: send accessToken
-        return "Signed in successfully!"
+        return SingUpResponse(accessToken = tokenPair.accessToken)
     }
 
     @PostMapping("/refresh/tokens ")

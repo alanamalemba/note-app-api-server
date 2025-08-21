@@ -3,6 +3,7 @@ package com.example.noteappapi.service
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import org.apache.juli.logging.Log
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.Date
@@ -50,12 +51,17 @@ class JwtService(
 
     private fun parseAllClaims(token: String): Claims? {
         return try {
+            println("In parseAllClaims")
             Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .payload
         } catch (e: Exception) {
+            println("System.currentTimeMillis(): ${System.currentTimeMillis()}")
+            println("Date(): ${Date()}")
+
+            println("Error in parsin of claims: $e")
 
             null
 
@@ -65,9 +71,13 @@ class JwtService(
     fun validateAccessToken(token: String): Boolean {
         val claims = parseAllClaims(token) ?: return false
 
+        println("Claims: $claims")
+
         val tokenTypeValue = claims[JWT_CLAIM_TYPE] as? String ?: return false
 
-        return tokenTypeValue === JwtType.ACCESS.value
+        println("token type: ${tokenTypeValue}: ${tokenTypeValue == JwtType.ACCESS.value}: ${JwtType.ACCESS.value}")
+
+        return tokenTypeValue == JwtType.ACCESS.value
 
     }
 
@@ -76,7 +86,7 @@ class JwtService(
 
         val tokenTypeValue = claims[JWT_CLAIM_TYPE] as? String ?: return false
 
-        return tokenTypeValue === JwtType.REFRESH.value
+        return tokenTypeValue == JwtType.REFRESH.value
 
     }
 

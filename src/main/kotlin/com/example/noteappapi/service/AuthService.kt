@@ -19,10 +19,12 @@ class AuthService(
         val accessToken: String, val refreshToken: String
     )
 
-    fun signUp(email: String, password: String): UserDto {
+    fun signUp(email: String, password: String): TokenPair {
         val hashedPassword = passwordEncoder.encode(password)
         val savedUser = userRepository.save(User(email = email, hashedPassword = hashedPassword))
-        return savedUser.toUserDto()
+        val tokenPair = generateTokenPair(savedUser.id)
+
+        return TokenPair(accessToken = tokenPair.accessToken, refreshToken = tokenPair.refreshToken)
     }
 
     fun singIn(email: String, password: String): TokenPair {
@@ -45,7 +47,7 @@ class AuthService(
         return TokenPair(accessToken = newAccessToken, refreshToken = newRefreshToken)
     }
 
-    fun refreshTokens( refreshToken: String): TokenPair {
+    fun refreshTokens(refreshToken: String): TokenPair {
         if (!jwtService.validateRefreshToken(refreshToken)) throw BadCredentialsException("Invalid refresh Token")
 
         val userId = jwtService.getUserIdFromToken(refreshToken)
