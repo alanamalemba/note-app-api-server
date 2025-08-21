@@ -11,7 +11,7 @@ import org.intellij.lang.annotations.Identifier
 data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0,
 
     @Column(unique = true, nullable = false)
     val email: String,

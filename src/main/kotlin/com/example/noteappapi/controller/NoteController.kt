@@ -6,6 +6,7 @@ import com.example.noteappapi.mapper.toNoteDto
 import com.example.noteappapi.model.Note
 import com.example.noteappapi.repository.NoteRepository
 import jakarta.validation.Valid
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -16,12 +17,14 @@ class NoteController(private val noteRepository: NoteRepository) {
 
     @PostMapping
     fun saveNote(@Valid @RequestBody saveNoteRequestBody: SaveNoteRequestBody): NoteDto {
+        val ownerId: Long = SecurityContextHolder.getContext().authentication.principal as Long
+
         val savedNote = noteRepository.save(
             Note(
                 title = saveNoteRequestBody.title,
                 content = saveNoteRequestBody.content,
                 color = saveNoteRequestBody.color,
-                ownerId = 0
+                ownerId = ownerId
             )
         )
 
@@ -38,8 +41,24 @@ class NoteController(private val noteRepository: NoteRepository) {
 
     }
 
+    @GetMapping("/me")
+    fun getNotesByAuthenticatedUser(): List<NoteDto> {
+        val ownerId: Long = SecurityContextHolder.getContext().authentication.principal as Long
+
+        return noteRepository.findByOwnerId(ownerId).map {
+            it.toNoteDto()
+        }
+
+    }
+
     @DeleteMapping("/{noteId}")
     fun deleteNoteById(@PathVariable noteId: Long): String {
+        val ownerId: Long = SecurityContextHolder.getContext().authentication.principal as Long
+
+        val targetNote = noteRepository.findById(ownerId).orElseThrow { Exception("Note does not exist") }
+
+        if (ownerId != targetNote.ownerId) throw Exception("Not allowed")
+
         noteRepository.deleteById(noteId)
 
         return "Note of id $noteId deleted successfully!"
