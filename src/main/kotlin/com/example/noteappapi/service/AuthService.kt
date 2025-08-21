@@ -5,12 +5,14 @@ import com.example.noteappapi.mapper.toUserDto
 import com.example.noteappapi.model.User
 import com.example.noteappapi.repository.UserRepository
 import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
 
+@Service
 class AuthService(
     private val jwtService: JwtService,
     private val userRepository: UserRepository,
-    private val bCryptPasswordEncoder: BCryptPasswordEncoder
+    private val passwordEncoder: PasswordEncoder
 ) {
 
     data class TokenPair(
@@ -18,7 +20,7 @@ class AuthService(
     )
 
     fun signUp(email: String, password: String): UserDto {
-        val hashedPassword = bCryptPasswordEncoder.encode(password)
+        val hashedPassword = passwordEncoder.encode(password)
         val savedUser = userRepository.save(User(email = email, hashedPassword = hashedPassword))
         return savedUser.toUserDto()
     }
@@ -26,7 +28,7 @@ class AuthService(
     fun singIn(email: String, password: String): TokenPair {
         val targetUser = userRepository.findByEmail(email) ?: throw BadCredentialsException("Invalid credentials")
 
-        if (!bCryptPasswordEncoder.matches(
+        if (!passwordEncoder.matches(
                 password,
                 targetUser.hashedPassword
             )
