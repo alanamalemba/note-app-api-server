@@ -4,9 +4,11 @@ import com.example.noteappapi.dto.UserDto
 import com.example.noteappapi.mapper.toUserDto
 import com.example.noteappapi.model.User
 import com.example.noteappapi.repository.UserRepository
+import org.springframework.http.HttpStatusCode
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class AuthService(
@@ -48,7 +50,10 @@ class AuthService(
     }
 
     fun refreshTokens(refreshToken: String): TokenPair {
-        if (!jwtService.validateRefreshToken(refreshToken)) throw BadCredentialsException("Invalid refresh Token")
+        if (!jwtService.validateRefreshToken(refreshToken)) throw ResponseStatusException(
+            HttpStatusCode.valueOf(401),
+            "Invalid refresh Token"
+        )
 
         val userId = jwtService.getUserIdFromToken(refreshToken)
 
