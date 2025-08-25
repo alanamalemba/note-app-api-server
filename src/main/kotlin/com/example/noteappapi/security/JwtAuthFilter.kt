@@ -50,7 +50,7 @@ class JwtAuthFilter(private val jwtService: JwtService, val userDetailsServiceIm
         val userDetails = userDetailsServiceImpl.loadUserById(userId)
 
         println("User id form token: $userId")
-        val auth = UsernamePasswordAuthenticationToken(userDetails, null)
+        val auth = UsernamePasswordAuthenticationToken(userDetails, null, emptyList())
         println("Auth: $auth")
         SecurityContextHolder.getContext().authentication = auth
 
