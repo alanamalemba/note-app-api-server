@@ -63,6 +63,15 @@ class NoteController(private val noteRepository: NoteRepository) {
 
     }
 
+    @GetMapping
+    fun getAllNotes(): List<NoteDto> {
+
+        return noteRepository.findAll().map {
+            it.toNoteDto()
+        }
+
+    }
+
     @DeleteMapping("/{noteId}")
     fun deleteNoteById(@PathVariable noteId: Long): String {
         val ownerId: Long = getOwnerIdFromSecurityContext()
